@@ -2,6 +2,7 @@
 
 # Standard Libraries
 import pygame
+import sys
 from typing import List, Dict, TYPE_CHECKING
 
 # Local Modules
@@ -146,16 +147,54 @@ class PygameInputHandler(InputHandler):
         return 1
 
     def prompt_human_agent_choose_red_apple(self, player: "Agent", red_apples: List["RedApple"],
-                                     green_apple: "GreenApple") -> int:
+                                    green_apple: "GreenApple") -> int:
         """Prompt a human player to select a red apple."""
-        from src.ui.gui.pygame.pygame_dialogs import RedCardSelectionDialog
+        from src.interface.output.pygame_output_handler import PygameOutputHandler
 
-        # Run the red card selection dialog
-        dialog = RedCardSelectionDialog(self.ui.screen, player, red_apples, green_apple)
-        result = dialog.run()
+        # Get a reference to the output handler
+        output_handler = self.ui._output_handler
 
-        # If dialog was closed without selection, default to first card
-        return result if result is not None else 0
+        if not isinstance(output_handler, PygameOutputHandler):
+            # Fallback to default selection if not using Pygame
+            return 0
+
+        # Clear the screen for card selection
+        self.ui.screen.fill(BACKGROUND_COLOR)
+
+        # Draw player's hand of cards
+        card_rects = output_handler.draw_player_hand(player, red_apples, green_apple)
+
+        # Display prompt text
+        self.ui.show_notification(f"{player.get_name()}, select a red apple")
+
+        # Update display
+        pygame.display.flip()
+
+        # Wait for player to select a card
+        selected_index = None
+        running = True
+
+        while running:
+            for event in pygame.event.get():
+                if event.type == pygame.QUIT:
+                    pygame.quit()
+                    sys.exit()
+
+                if event.type == pygame.MOUSEBUTTONDOWN:
+                    # Check if player clicked on a card
+                    mouse_pos = pygame.mouse.get_pos()
+
+                    for rect, index in card_rects:
+                        if rect.collidepoint(mouse_pos):
+                            selected_index = index
+                            running = False
+                            break
+
+            # Short delay to reduce CPU usage
+            pygame.time.wait(30)
+
+        # Return the selected card index (or default to 0 if somehow nothing was selected)
+        return selected_index if selected_index is not None else 0
 
     def prompt_judge_select_winner(self, judge: "Agent", submissions: Dict["Agent", "RedApple"],
                                 green_apple: "GreenApple") -> "Agent":

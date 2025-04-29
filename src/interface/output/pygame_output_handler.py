@@ -88,6 +88,26 @@ class PygameOutputHandler(OutputHandler):
         x = (self.ui.width - card_width) // 2
         y = 80
 
+        self._draw_single_green_card(self._current_green_apple, x, y, card_width, card_height)
+
+    def _draw_single_green_card(self, green_apple: "GreenApple", x: int, y: int,
+                              card_width: int = 300, card_height: int = 120) -> pygame.Rect:
+        """
+        Draw a single green apple card.
+
+        Args:
+            green_apple: The green apple object to draw
+            x: X coordinate for the top-left corner
+            y: Y coordinate for the top-left corner
+            card_width: Width of the card
+            card_height: Height of the card
+
+        Returns:
+            The pygame.Rect of the drawn card
+        """
+        # Create card rectangle
+        card_rect = pygame.Rect(x, y, card_width, card_height)
+
         # Draw green card background
         # Outer border (darker green)
         pygame.draw.rect(self.ui.screen, (50, 120, 50),
@@ -96,8 +116,7 @@ class PygameOutputHandler(OutputHandler):
 
         # Card background (green)
         pygame.draw.rect(self.ui.screen, (100, 180, 100),
-                      (x, y, card_width, card_height),
-                      border_radius=8)
+                      card_rect, border_radius=8)
 
         # Inner highlight (lighter green)
         pygame.draw.rect(self.ui.screen, (120, 200, 120),
@@ -109,16 +128,18 @@ class PygameOutputHandler(OutputHandler):
                       x + card_width//2, y + 20, center=True)
 
         # Adjective text
-        adjective = self._current_green_apple.get_adjective()
+        adjective = green_apple.get_adjective()
         self.ui.draw_text(adjective, self.ui.font_large, (30, 80, 30),
                       x + card_width//2, y + card_height//2, center=True)
 
         # Draw synonyms if available
-        if hasattr(self._current_green_apple, "get_synonyms"):
-            synonyms = self._current_green_apple.get_synonyms()
+        if hasattr(green_apple, "get_synonyms"):
+            synonyms = green_apple.get_synonyms()
             if synonyms:
                 self.ui.draw_text(f"({synonyms})", self.ui.font_small, (30, 80, 30),
                               x + card_width//2, y + card_height - 25, center=True)
+
+        return card_rect
 
     def _draw_players(self):
         """Draw the player list with scores."""
@@ -161,12 +182,7 @@ class PygameOutputHandler(OutputHandler):
         spacing_y = 200
         card_width = 200
         card_height = 200
-        cards_per_row = 4
         spacing_x = 50
-
-        # Calculate layout
-        total_width = cards_per_row * (card_width + spacing_x) - spacing_x
-        start_x = (self.ui.width - total_width) // 2
 
         # Calculate actual submissions
         total_submitted = len(self._submitted_red_apples)
@@ -182,6 +198,11 @@ class PygameOutputHandler(OutputHandler):
         # Ensure total_expected is at least as large as total_submitted
         total_expected = max(total_expected, total_submitted)
 
+        # Calculate layout after determining total_expected
+        cards_per_row = total_expected
+        total_width = cards_per_row * (card_width + spacing_x) - spacing_x
+        start_x = (self.ui.width - total_width) // 2
+
         # Display header with submission count
         self.ui.draw_text(f"Submitted Red Apples: {total_submitted}/{total_expected}",
                       self.ui.font_normal, (230, 230, 230),
@@ -189,9 +210,6 @@ class PygameOutputHandler(OutputHandler):
 
         # Draw each submitted red apple
         for i, (player, apple) in enumerate(self._submitted_red_apples):
-            if not apple or not hasattr(apple, "get_noun"):
-                continue
-
             # Calculate position
             row = i // cards_per_row
             col = i % cards_per_row
@@ -201,88 +219,174 @@ class PygameOutputHandler(OutputHandler):
             # Determine if this is the winning card
             is_winner = (self._winning_red_apple and self._winning_red_apple == apple)
 
-            # Outer border color
-            border_color = (255, 215, 0) if is_winner else (120, 40, 40)  # Gold for winner
-            inner_color = (180, 60, 60) if is_winner else (150, 50, 50)  # Brighter red for winner
+            # Use the helper method to draw the card
+            self._draw_single_red_card(apple, player, x, y, card_width, card_height, is_winner)
 
-            # Draw card with similar style to green cards
-            # Outer border
-            pygame.draw.rect(self.ui.screen, border_color,
-                          (x-4, y-4, card_width+8, card_height+8),
-                          border_radius=10)
+    def _draw_single_red_card(self, red_apple: "RedApple", player: "Agent", x: int, y: int,
+                            card_width: int = 200, card_height: int = 200,
+                            is_winner: bool | None = False, show_player: bool = True) -> pygame.Rect:
+        """
+        Draw a single red apple card.
 
-            # Card background
-            pygame.draw.rect(self.ui.screen, (80, 20, 20),
-                          (x, y, card_width, card_height),
-                          border_radius=8)
+        Args:
+            red_apple: The red apple object to draw
+            player: The player who owns/submitted this card
+            x: X coordinate for the top-left corner
+            y: Y Ycoordinate for the top-left corner
+            card_width: Width of the card
+            card_height: Height of the card
+            is_winner: Whether this card is the winning card
+            show_player: Whether to show the player name
 
-            # Inner highlight
-            pygame.draw.rect(self.ui.screen, inner_color,
-                          (x+2, y+2, card_width-4, card_height-4),
-                          width=2, border_radius=7)
+        Returns:
+            The pygame.Rect of the drawn card
+        """
+        if not red_apple or not hasattr(red_apple, "get_noun"):
+            return pygame.Rect(x, y, card_width, card_height)
 
-            # Card title
-            self.ui.draw_text("RED APPLE", self.ui.font_small, (200, 100, 100),
-                          x + card_width//2, y + 20, center=True)
+        # Create card rectangle
+        card_rect = pygame.Rect(x, y, card_width, card_height)
 
-            # Noun text (main content)
-            self.ui.draw_text(apple.get_noun(), self.ui.font_normal, (255, 200, 200),
-                          x + card_width//2, y + 55, center=True)
+        # Outer border color
+        border_color = (255, 215, 0) if is_winner else (120, 40, 40)  # Gold for winner
+        inner_color = (180, 60, 60) if is_winner else (150, 50, 50)  # Brighter red for winner
 
-            # Description text (below the noun) - Multiple lines
-            if hasattr(apple, "get_description"):
-                description = apple.get_description()
-                if description:
-                    # Split description into multiple lines (max 4)
-                    desc_lines = []
-                    words = description.split()
-                    current_line = ""
+        # Draw card with similar style to green cards
+        # Outer border
+        pygame.draw.rect(self.ui.screen, border_color,
+                      (x-4, y-4, card_width+8, card_height+8),
+                      border_radius=10)
 
-                    for word in words:
-                        # Increased from 20 to 28 characters per line (80% of card width)
-                        if len(current_line + " " + word) <= 28:  # Character limit per line
-                            if current_line:
-                                current_line += " " + word
-                            else:
-                                current_line = word
+        # Card background
+        pygame.draw.rect(self.ui.screen, (80, 20, 20),
+                      card_rect, border_radius=8)
+
+        # Inner highlight
+        pygame.draw.rect(self.ui.screen, inner_color,
+                      (x+2, y+2, card_width-4, card_height-4),
+                      width=2, border_radius=7)
+
+        # Card title
+        self.ui.draw_text("RED APPLE", self.ui.font_small, (200, 100, 100),
+                      x + card_width//2, y + 20, center=True)
+
+        # Noun text (main content)
+        self.ui.draw_text(red_apple.get_noun(), self.ui.font_normal, (255, 200, 200),
+                      x + card_width//2, y + 55, center=True)
+
+        # Description text (below the noun) - Multiple lines
+        if hasattr(red_apple, "get_description"):
+            description = red_apple.get_description()
+            if description:
+                # Split description into multiple lines (max 4)
+                desc_lines = []
+                words = description.split()
+                current_line = ""
+
+                for word in words:
+                    # Increased from 20 to 28 characters per line (80% of card width)
+                    if len(current_line + " " + word) <= 28:  # Character limit per line
+                        if current_line:
+                            current_line += " " + word
                         else:
-                            desc_lines.append(current_line)
                             current_line = word
-                            if len(desc_lines) >= 3:  # Limit to 3 lines + the current line
-                                break
-
-                    if current_line:
+                    else:
                         desc_lines.append(current_line)
+                        current_line = word
+                        if len(desc_lines) >= 3:  # Limit to 3 lines + the current line
+                            break
 
-                    # Add ellipsis if we truncated the description
-                    if len(desc_lines) == 4 and len(" ".join(desc_lines)) < len(description):
-                        desc_lines[3] = desc_lines[3][:17] + "..."
+                if current_line:
+                    desc_lines.append(current_line)
 
-                    # Draw each line of the description
-                    for line_num, line in enumerate(desc_lines):
-                        line_y = y + 85 + (line_num * 20)
-                        self.ui.draw_text(line, self.ui.font_small, (200, 150, 150),
-                                      x + card_width//2, line_y, center=True)
+                # Add ellipsis if we truncated the description
+                if len(desc_lines) == 4 and len(" ".join(desc_lines)) < len(description):
+                    desc_lines[3] = desc_lines[3][:17] + "..."
 
-            # Player name at bottom
-            if hasattr(player, "get_name"):
-                self.ui.draw_text(f"({player.get_name()})", self.ui.font_small, (200, 150, 150),
-                              x + card_width//2, y + card_height - 20, center=True)
+                # Draw each line of the description
+                for line_num, line in enumerate(desc_lines):
+                    line_y = y + 85 + (line_num * 20)
+                    self.ui.draw_text(line, self.ui.font_small, (200, 150, 150),
+                                  x + card_width//2, line_y, center=True)
 
-            # Winner indicator
-            if is_winner:
-                # Draw winner ribbon in bottom right corner
-                pygame.draw.polygon(self.ui.screen, (255, 215, 0), [
-                    (x + card_width - 40, y + card_height - 5),
-                    (x + card_width - 5, y + card_height - 5),
-                    (x + card_width - 5, y + card_height - 40)
-                ])
+        # Player name at bottom
+        if show_player and hasattr(player, "get_name"):
+            self.ui.draw_text(f"({player.get_name()})", self.ui.font_small, (200, 150, 150),
+                          x + card_width//2, y + card_height - 20, center=True)
 
-                # Draw winner text
-                winner_surf = self.ui.font_small.render("WINNER", True, (255, 215, 0))
-                winner_rect = winner_surf.get_rect()
-                winner_rect.midtop = (x + card_width // 2, y + card_height + 5)
-                self.ui.screen.blit(winner_surf, winner_rect)
+        # Winner indicator
+        if is_winner:
+            # Draw winner ribbon in bottom right corner
+            pygame.draw.polygon(self.ui.screen, (255, 215, 0), [
+                (x + card_width - 40, y + card_height - 5),
+                (x + card_width - 5, y + card_height - 5),
+                (x + card_width - 5, y + card_height - 40)
+            ])
+
+            # Draw winner text
+            winner_surf = self.ui.font_small.render("WINNER", True, (255, 215, 0))
+            winner_rect = winner_surf.get_rect()
+            winner_rect.midtop = (x + card_width // 2, y + card_height + 5)
+            self.ui.screen.blit(winner_surf, winner_rect)
+
+        return card_rect
+
+    def draw_player_hand(self, player: "Agent", red_apples: List["RedApple"],
+                   green_apple: "GreenApple") -> List[Tuple[pygame.Rect, int]]:
+        """
+        Draw the hand of red apple cards for a human player to select from.
+
+        Args:
+            player: The human player
+            red_apples: List of red apples in the player's hand
+            green_apple: The green apple in play
+
+        Returns:
+            List of tuples (rect, index) for click detection
+        """
+        # First, draw the green apple at the top
+        green_card_width = 300
+        green_card_height = 120
+        green_x = (self.ui.width - green_card_width) // 2
+        green_y = 80
+
+        self._draw_single_green_card(green_apple, green_x, green_y, green_card_width, green_card_height)
+
+        # Draw instructions
+        instruction_y = green_y + green_card_height + 20
+        self.ui.draw_text(f"Select a red apple to match: {green_apple.get_adjective()}",
+                      self.ui.font_normal, (230, 230, 230),
+                      self.ui.width // 2, instruction_y, center=True)
+
+        # Red cards dimensions
+        card_width = 160  # Slightly smaller than game cards
+        card_height = 180
+        spacing_x = 20
+        start_y = instruction_y + 40
+
+        # Calculate layout
+        cards_per_row = min(5, len(red_apples))
+        total_width = cards_per_row * (card_width + spacing_x) - spacing_x
+        start_x = (self.ui.width - total_width) // 2
+
+        # Store card rectangles with their indices
+        card_rects = []
+
+        # Draw red apple cards in the player's hand
+        for i, apple in enumerate(red_apples):
+            row = i // cards_per_row
+            col = i % cards_per_row
+            x = start_x + col * (card_width + spacing_x)
+            y = start_y + row * (card_height + 20)
+
+            # Draw the card
+            card_rect = self._draw_single_red_card(
+                apple, player, x, y, card_width, card_height, False, False)
+
+            # Store the rectangle and index for click detection
+            card_rects.append((card_rect, i))
+
+        return card_rects
 
     def _draw_messages(self):
         """Draw the message area at bottom of screen."""
