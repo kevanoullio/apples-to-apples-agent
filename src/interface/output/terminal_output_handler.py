@@ -143,14 +143,6 @@ class TerminalOutputHandler(OutputHandler):
                 print(message2)
                 logging.info(message2)
 
-    def draw_current_players_hand(self, player: "Agent") -> List:
-        """Draw the current player's hand of red apples."""
-        if self.print_in_terminal:
-            print(f"\n{player.get_name()}'s hand:")
-            for i, red_apple in enumerate(player.get_red_apples()):
-                print(f"{i + 1}. {red_apple}")
-        return player.get_red_apples()
-
     def display_red_apple_chosen(self, player: "Agent", red_apple: "RedApple") -> None:
         """Display the red apple chosen by a player via terminal output."""
         if self.print_in_terminal:
@@ -280,3 +272,26 @@ class TerminalOutputHandler(OutputHandler):
     def log_debug(self, message: str) -> None:
         """Log a debug message."""
         logging.debug(message)
+
+    # Drawing Cards for gui
+    def draw_game_state(self) -> None:
+        """Draw the game state."""
+        if self.print_in_terminal:
+            print("Drawing game state...")
+            # Placeholder for actual game state drawing logic
+
+    def draw_current_players_hand(self, player: "Agent") -> List:
+        """Draw the current player's hand of red apples."""
+        if self.print_in_terminal:
+            print(f"\n{player.get_name()}'s hand:")
+            for i, red_apple in enumerate(player.get_red_apples()):
+                print(f"{i + 1}. {red_apple}")
+        return player.get_red_apples()
+
+    def get_submitted_red_card_rects(self) -> List:
+        """Get the rectangles for the submitted red cards."""
+        if self.print_in_terminal:
+            print("Getting rectangles for submitted red cards...")
+            # Placeholder for actual rectangle drawing logic
+            return []
+        return []
