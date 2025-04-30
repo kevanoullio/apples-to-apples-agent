@@ -210,16 +210,75 @@ class PygameInputHandler(InputHandler):
         return selected_index if selected_index is not None else 0
 
     def prompt_judge_select_winner(self, judge: "Agent", submissions: Dict["Agent", "RedApple"],
-                                green_apple: "GreenApple") -> "Agent":
+                             green_apple: "GreenApple") -> "Agent":
         """Prompt the judge to select the winning red apple."""
-        from src.ui.gui.pygame.pygame_dialogs import JudgeSelectionDialog
+        # For non-human judges, use the dialog
+        if not judge.is_human():
+            from src.ui.gui.pygame.pygame_dialogs import JudgeSelectionDialog
 
-        # Run the judge selection dialog
-        dialog = JudgeSelectionDialog(self.ui.screen, judge, submissions, green_apple)
-        result = dialog.run()
+            # Run the judge selection dialog
+            dialog = JudgeSelectionDialog(self.ui.screen, judge, submissions, green_apple)
+            result = dialog.run()
 
-        # If dialog was closed without selection, default to first player
-        return result if result else list(submissions.keys())[0]
+            # If dialog was closed without selection, default to first player
+            return result if result else list(submissions.keys())[0]
+
+        # For human judges, allow clicking directly on the cards in the main view
+        # Get a reference to the output handler
+        output_handler = self.ui._output_handler
+
+        # Create the message with the green apple adjective
+        message = f"{judge.get_name()}, select the winning red apple for: {green_apple.get_adjective()}"
+
+        # Display prompt text with infinite duration
+        self.ui.show_notification(message, float("inf"))
+
+        # Wait for judge to select a card
+        selected_player = None
+        running = True
+
+        while running:
+            for event in pygame.event.get():
+                if event.type == pygame.QUIT:
+                    pygame.quit()
+                    sys.exit()
+
+                if event.type == pygame.MOUSEBUTTONDOWN:
+                    # Check if player clicked on a card
+                    mouse_pos = pygame.mouse.get_pos()
+
+                    # Get the rectangles of all the submitted red apple cards
+                    card_rects = output_handler.get_submitted_red_card_rects()
+
+                    # Check for clicks on cards
+                    for rect, player in card_rects:
+                        if rect.collidepoint(mouse_pos):
+                            selected_player = player
+                            running = False
+                            break
+
+        # Redraw the screen
+        self.ui.process_events()
+
+        # Draw game state to show cards
+        self.ui.screen.fill(BACKGROUND_COLOR)
+        output_handler.draw_game_state()
+
+        # Highlight the clickable cards for the human judge
+        for rect, player in output_handler.get_submitted_red_card_rects():
+            # Add a subtle glow effect around each card to indicate it's clickable
+            pygame.draw.rect(self.ui.screen, (200, 180, 50),
+                          rect.inflate(12, 12), width=3, border_radius=12)
+
+        # Re-display the notification each frame to ensure it stays visible
+        self.ui.show_notification(message, float("inf"))
+
+        # Redraw the screen
+        pygame.display.flip()
+        pygame.time.wait(30)  # Short delay to reduce CPU usage
+
+        # Return the selected player (or default to first one if nothing was selected)
+        return selected_player if selected_player else list(submissions.keys())[0]
 
     def prompt_training_model_type(self) -> str:
         """Prompt for the model type in training mode."""

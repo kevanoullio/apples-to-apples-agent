@@ -410,3 +410,13 @@ class OutputHandler(ABC):
             player: The player whose hand to draw
         """
         pass
+
+    @abstractmethod
+    def get_submitted_red_card_rects(self) -> List:
+        """
+        Get the rectangles for the submitted red cards.
+
+        Returns:
+            List of rectangles for the submitted red cards
+        """
+        pass

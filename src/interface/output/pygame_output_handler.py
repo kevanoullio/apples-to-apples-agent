@@ -358,6 +358,56 @@ class PygameOutputHandler(OutputHandler):
 
         return card_rect
 
+    def get_submitted_red_card_rects(self) -> List:
+        """
+        Get the rectangles and associated players for the submitted red apple cards.
+
+        Returns:
+            List of tuples (rect, player) for click detection
+        """
+        if not self._submitted_red_apples:
+            return []
+
+        card_rects = []
+
+        # Use the same layout calculations as in _draw_red_apples
+        start_y = 270
+        card_width = 200
+        card_height = 200
+        spacing_x = 50
+
+        # Calculate layout
+        total_submitted = len(self._submitted_red_apples)
+
+        # Get player count from the state manager if available
+        if self._state_manager and self._state_manager.game_log:
+            total_expected = self._state_manager.game_log.get_number_of_players() - 1
+        else:
+            total_expected = total_submitted
+
+        # Ensure total_expected is at least as large as total_submitted
+        total_expected = max(total_expected, total_submitted)
+
+        # Calculate layout
+        cards_per_row = total_expected
+        total_width = cards_per_row * (card_width + spacing_x) - spacing_x
+        start_x = (self.ui.width - total_width) // 2
+
+        # Calculate rectangle for each card
+        for i, (player, apple) in enumerate(self._submitted_red_apples):
+            row = i // cards_per_row
+            col = i % cards_per_row
+            x = start_x + col * (card_width + spacing_x)
+            y = start_y + row * 200  # Use the same spacing_y as in _draw_red_apples
+
+            # Create the rectangle
+            card_rect = pygame.Rect(x, y, card_width, card_height)
+
+            # Store the rectangle and player
+            card_rects.append((card_rect, player))
+
+        return card_rects
+
     def draw_current_players_hand(self, player: "Agent"):
         """
         Draw the current player's hand of red apple cards in the lower section.
