@@ -371,7 +371,7 @@ class ApplesToApples:
                 self.__model_config.use_extra_vectors
             )
 
-    def __choose_starting_judge(self) -> Agent:
+    def __determine_starting_judge(self) -> Agent:
         """Choose the starting judge for a game."""
         # Clear judge status for all players
         for i, player in enumerate(self.__game_log.get_game_players()):
@@ -397,15 +397,16 @@ class ApplesToApples:
                     judge_index = self.__interface.prompt_starting_judge(player_count) - 1
                 else:
                     judge_index = 0
-
-        return self.__game_log.get_game_players()[judge_index]
+        next_judge: "Agent" = self.__game_log.get_game_players()[judge_index]
+        next_judge.set_judge_status(True)
+        return next_judge
 
     def __determine_next_judge(self) -> Agent:
         """Determine the next judge for a round."""
         # If first round, choose the starting judge
         if self.__game_log.get_current_round_number() == 0:
             # Choose the starting judge and set the judge status
-            next_judge = self.__choose_starting_judge()
+            next_judge = self.__determine_starting_judge()
             next_judge.set_judge_status(True)
 
             self.__interface.display_starting_judge(next_judge.get_name())
@@ -433,14 +434,25 @@ class ApplesToApples:
 
     def __new_round(self) -> None:
         """Start a new round of the game."""
-        # Determine the next judge
-        next_judge = self.__determine_next_judge()
+        # For the first round, determine the starting judge
+        if self.__game_log.get_current_round_number() == 0:
+            next_judge = self.__determine_starting_judge()
+        else:
+            # For subsequent rounds, determine the next judge
+            next_judge = self.__determine_next_judge()
 
-        # Initialize the round state
-        self.__state_manager.start_new_round(next_judge)
+        # Find the first non-judge player to start the round
+        players = self.__game_log.get_game_players()
+        judge_index = players.index(next_judge)
+        first_player_index = (judge_index + 1) % len(players)
+        first_player = players[first_player_index]
+
+        # Initialize the round state with both judge and first player's turn
+        round_state = RoundState(current_judge=next_judge, current_players_turn=first_player)
+        self.__game_log.add_round(round_state)
+
+        # Display round number
         round_number = self.__game_log.get_current_round_number()
-
-        # Display round header
         self.__interface.display_round_header(round_number)
 
         # Display player points
@@ -479,45 +491,70 @@ class ApplesToApples:
         current_judge = self.__game_log.get_current_judge()
         green_apple = self.__game_log.get_apples_in_play().get_green_apple()
 
-        for player in self.__game_log.get_game_players():
-            # Skip the judge
-            if player.get_judge_status():
-                continue
+        # Get the list of all players
+        players = self.__game_log.get_game_players()
+        player_count = len(players)
+
+        # Initialize a counter to track how many players have played
+        players_remaining = player_count - 1  # exclude judge
+
+        while players_remaining > 0:
+            # Get current player
+            current_player = self.__game_log.get_current_players_turn()
 
             # Prompt player to select a red apple
             if self.__training_mode:
                 self.__interface.display_training_green_apple(green_apple.get_adjective())
-                self.__interface.display_player_red_apples(player)
-                self.__interface.prompt_training_select_red_apple(player, green_apple)
+                self.__interface.display_player_red_apples(current_player)
+                self.__interface.prompt_training_select_red_apple(current_player, green_apple)
             else:
                 self.__interface.display_green_apple(current_judge, green_apple)
-                self.__interface.display_player_red_apples(player)
-                self.__interface.prompt_select_red_apple(player, green_apple)
+                self.__interface.display_player_red_apples(current_player)
+                self.__interface.prompt_select_red_apple(current_player, green_apple)
 
             # Let the player choose a red card from their hand
-            chosen_red_apple_dict: dict[Agent, RedApple] = player.choose_red_apple(current_judge, green_apple)
+            chosen_red_apple_dict: dict[Agent, RedApple] = current_player.choose_red_apple(current_judge, green_apple)
             self.__state_manager.add_red_apple_in_play(chosen_red_apple_dict)
-            self.__interface.display_red_apple_chosen(player, chosen_red_apple_dict[player])
+            self.__interface.display_red_apple_chosen(current_player, chosen_red_apple_dict[current_player])
 
             # For training mode, prompt for a bad red apple too
             if self.__training_mode:
                 self.__interface.display_training_green_apple(green_apple.get_adjective())
-                self.__interface.display_player_red_apples(player)
-                self.__interface.prompt_training_select_bad_red_apple(player, green_apple)
+                self.__interface.display_player_red_apples(current_player)
+                self.__interface.prompt_training_select_bad_red_apple(current_player, green_apple)
 
                 # Choose a bad red apple
-                bad_red_apple_dict: dict[Agent, RedApple] = player.choose_red_apple(current_judge, green_apple)
+                bad_red_apple_dict: dict[Agent, RedApple] = current_player.choose_red_apple(current_judge, green_apple)
                 self.__state_manager.add_red_apple_in_play(bad_red_apple_dict)
-                self.__interface.display_red_apple_chosen(player, chosen_red_apple_dict[player])
+                self.__interface.display_red_apple_chosen(current_player, chosen_red_apple_dict[current_player])
 
             # Draw new cards if needed
-            if len(player.get_red_apples()) < self.__game_log.max_cards_in_hand:
-                player.draw_red_apples(
+            if len(current_player.get_red_apples()) < self.__game_log.max_cards_in_hand:
+                current_player.draw_red_apples(
                     self.__embedding,
                     self.__red_apples_deck,
                     self.__game_log.max_cards_in_hand,
                     self.__model_config.use_extra_vectors
                 )
+
+            # Advance to the next player's turn
+            judge_index = players.index(current_judge)
+            current_index = players.index(current_player)
+
+            # Find next player, skipping the judge
+            next_index = (current_index + 1) % player_count
+            if next_index == judge_index:
+                next_index = (next_index + 1) % player_count
+
+            # Set the next player as the current player's turn
+            next_player = players[next_index]
+            self.__game_log.set_current_players_turn(next_player)
+
+            players_remaining -= 1
+
+        # Clear current player indicator when done
+        if hasattr(self.__interface, "output_handler") and hasattr(self.__interface.output_handler, "clear_current_selecting_player"):
+            self.__interface.output_handler.clear_current_selecting_player()
 
     def __determine_round_winner(self) -> None:
         """Determine the winner of the current round."""
@@ -701,3 +738,4 @@ class ApplesToApples:
                         self.__game_log.get_current_game_state(),
                         True
                     )
+

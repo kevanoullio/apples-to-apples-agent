@@ -149,30 +149,22 @@ class PygameInputHandler(InputHandler):
     def prompt_human_agent_choose_red_apple(self, player: "Agent", red_apples: List["RedApple"],
                                     green_apple: "GreenApple") -> int:
         """Prompt a human player to select a red apple."""
-        from src.interface.output.pygame_output_handler import PygameOutputHandler
-
         # Get a reference to the output handler
         output_handler = self.ui._output_handler
 
-        if not isinstance(output_handler, PygameOutputHandler):
-            # Fallback to default selection if not using Pygame
-            return 0
+        # Create the message with the green apple adjective
+        message = f"{player.get_name()}, select a red apple to match: {green_apple.get_adjective()}"
 
-        # Clear the screen for card selection
-        self.ui.screen.fill(BACKGROUND_COLOR)
-
-        # Draw player's hand of cards
-        card_rects = output_handler.draw_player_hand(player, red_apples, green_apple)
-
-        # Display prompt text
-        self.ui.show_notification(f"{player.get_name()}, select a red apple")
-
-        # Update display
-        pygame.display.flip()
+        # Display prompt text with infinite duration
+        self.ui.show_notification(message, float("inf"))  # Set to infinite duration
 
         # Wait for player to select a card
         selected_index = None
         running = True
+
+        # Set current player in output handler to ensure cards are displayed
+        if hasattr(output_handler, "set_current_selecting_player"):
+            output_handler.set_current_selecting_player(player)
 
         while running:
             for event in pygame.event.get():
@@ -184,14 +176,35 @@ class PygameInputHandler(InputHandler):
                     # Check if player clicked on a card
                     mouse_pos = pygame.mouse.get_pos()
 
+                    # Get card rectangles from the current display
+                    card_rects = []
+                    if hasattr(output_handler, "draw_current_players_hand"):
+                        card_rects = output_handler.draw_current_players_hand(player)
+
+                    # Check for clicks on cards
                     for rect, index in card_rects:
                         if rect.collidepoint(mouse_pos):
                             selected_index = index
                             running = False
                             break
 
-            # Short delay to reduce CPU usage
-            pygame.time.wait(30)
+            # Redraw the screen
+            self.ui.process_events()
+
+            # Draw game state to show cards
+            self.ui.screen.fill(BACKGROUND_COLOR)
+            output_handler.draw_game_state()
+
+            # Re-display the notification each frame to ensure it stays visible
+            self.ui.show_notification(message, float("inf"))
+
+            # Redraw the screen
+            pygame.display.flip()
+            pygame.time.wait(30)  # Short delay to reduce CPU usage
+
+        # Clear current player selection state
+        if hasattr(output_handler, "clear_current_selecting_player"):
+            output_handler.clear_current_selecting_player()
 
         # Return the selected card index (or default to 0 if somehow nothing was selected)
         return selected_index if selected_index is not None else 0

@@ -31,9 +31,9 @@ class GameStateManager:
         game_state = GameState()
         self.game_log.add_game(game_state)
 
-    def start_new_round(self, judge: "Agent") -> None:
-        """Initialize a new round state with the specified judge."""
-        round_state = RoundState(current_judge=judge)
+    def start_new_round(self, judge: "Agent", first_player: "Agent") -> None:
+        """Initialize a new round state with the specified judge and first player."""
+        round_state = RoundState(current_judge=judge, current_players_turn=first_player)
         self.game_log.add_round(round_state)
 
     def set_green_apple_in_play(self, green_apple_dict: Dict["Agent", "GreenApple"]) -> None:

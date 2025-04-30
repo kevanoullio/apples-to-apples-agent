@@ -29,6 +29,16 @@ class OutputHandler(ABC):
         pass
 
     @abstractmethod
+    def set_current_selecting_player(self, player: "Agent") -> None:
+        """Set the player who is currently selecting a card."""
+        pass
+
+    @abstractmethod
+    def clear_current_selecting_player(self) -> None:
+        """Clear the current selecting player."""
+        pass
+
+    @abstractmethod
     def display_message(self, message: str) -> None:
         """
         Display a general message to the user.
@@ -382,5 +392,21 @@ class OutputHandler(ABC):
 
         Args:
             message: Debug message to log
+        """
+        pass
+
+    # Abstract methods for UI-specific drawing functions
+    @abstractmethod
+    def draw_game_state(self) -> None:
+        """Draw the current game state."""
+        pass
+
+    @abstractmethod
+    def draw_current_players_hand(self, player: "Agent") -> List:
+        """
+        Draw the current player's hand.
+
+        Args:
+            player: The player whose hand to draw
         """
         pass

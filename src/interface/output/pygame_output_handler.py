@@ -9,6 +9,7 @@ import pygame
 
 # Local Modules
 from src.interface.output.output_handler import OutputHandler
+from src.ui.gui.pygame.pygame_ui import BACKGROUND_COLOR
 
 # Type Checking to prevent circular imports
 if TYPE_CHECKING:
@@ -39,15 +40,33 @@ class PygameOutputHandler(OutputHandler):
         """Set the reference to the game state manager."""
         self._state_manager = state_manager
 
+    def set_current_selecting_player(self, player: "Agent") -> None:
+        """Set the player who is currently selecting a card."""
+        self._current_selecting_player = player
+
+    def clear_current_selecting_player(self) -> None:
+        """Clear the current selecting player."""
+        self._current_selecting_player = None
+
     def draw_game_state(self):
         """Draw the current game state on the screen."""
         try:
+            # Check if state manager and game log are initialized
+            if not self._state_manager or not self._state_manager.game_log:
+                logging.debug("State manager or game log not initialized yet")
+                # Draw a simple loading screen instead
+                self.ui.screen.fill(BACKGROUND_COLOR)
+                self.ui.draw_text("Loading game...", self.ui.font_large, (230, 230, 230),
+                              self.ui.width // 2, self.ui.height // 2, center=True)
+                self._draw_messages()
+                return
+
             # Draw game info header
-            self._draw_game_info()
+            self.__draw_game_info()
 
             # Draw green apple if available
             if self._current_green_apple:
-                self._draw_green_apple()
+                self.__draw_green_apple()
 
             # Draw players and scores
             self._draw_players()
@@ -55,15 +74,23 @@ class PygameOutputHandler(OutputHandler):
             # Draw submitted red apples
             self._draw_red_apples()
 
+            # Draw current player's hand if we're in card selection phase
+            if hasattr(self, "_current_selecting_player") and self._current_selecting_player:
+                # Determine if this is a human player
+                self.draw_current_players_hand(self._current_selecting_player)
+
             # Draw message area at bottom
             self._draw_messages()
-        except IndexError:
-            # Just draw a simple background if we haven't initialized state yet
-            logging.debug("Game state not yet fully initialized, drawing minimal UI")
-            # Still draw messages
+
+        except Exception as e:
+            # Fallback to basic screen
+            logging.debug(f"Error drawing game state: {e}")
+            self.ui.screen.fill(BACKGROUND_COLOR)
+            self.ui.draw_text("Initializing game...", self.ui.font_large, (230, 230, 230),
+                          self.ui.width // 2, self.ui.height // 2, center=True)
             self._draw_messages()
 
-    def _draw_game_info(self):
+    def __draw_game_info(self):
         """Draw game information (game number, round, judge)."""
         # Game number and round
         self.ui.draw_text(f"Game: {self._game_number}/{self._total_games}",
@@ -77,7 +104,7 @@ class PygameOutputHandler(OutputHandler):
             self.ui.draw_text(judge_text, self.ui.font_large, (250, 250, 100),
                           self.ui.width // 2, 30, center=True)
 
-    def _draw_green_apple(self):
+    def __draw_green_apple(self):
         """Draw the green apple card."""
         if not self._current_green_apple:
             return
@@ -88,9 +115,9 @@ class PygameOutputHandler(OutputHandler):
         x = (self.ui.width - card_width) // 2
         y = 80
 
-        self._draw_single_green_card(self._current_green_apple, x, y, card_width, card_height)
+        self.__draw_single_green_card(self._current_green_apple, x, y, card_width, card_height)
 
-    def _draw_single_green_card(self, green_apple: "GreenApple", x: int, y: int,
+    def __draw_single_green_card(self, green_apple: "GreenApple", x: int, y: int,
                               card_width: int = 300, card_height: int = 120) -> pygame.Rect:
         """
         Draw a single green apple card.
@@ -220,9 +247,9 @@ class PygameOutputHandler(OutputHandler):
             is_winner = (self._winning_red_apple and self._winning_red_apple == apple)
 
             # Use the helper method to draw the card
-            self._draw_single_red_card(apple, player, x, y, card_width, card_height, is_winner)
+            self.__draw_single_red_card(apple, player, x, y, card_width, card_height, is_winner)
 
-    def _draw_single_red_card(self, red_apple: "RedApple", player: "Agent", x: int, y: int,
+    def __draw_single_red_card(self, red_apple: "RedApple", player: "Agent", x: int, y: int,
                             card_width: int = 200, card_height: int = 200,
                             is_winner: bool | None = False, show_player: bool = True) -> pygame.Rect:
         """
@@ -331,57 +358,75 @@ class PygameOutputHandler(OutputHandler):
 
         return card_rect
 
-    def draw_player_hand(self, player: "Agent", red_apples: List["RedApple"],
-                   green_apple: "GreenApple") -> List[Tuple[pygame.Rect, int]]:
+    def draw_current_players_hand(self, player: "Agent"):
         """
-        Draw the hand of red apple cards for a human player to select from.
+        Draw the current player's hand of red apple cards in the lower section.
 
         Args:
-            player: The human player
-            red_apples: List of red apples in the player's hand
-            green_apple: The green apple in play
+            player: The current player whose turn it is
+            is_human: Whether this player is human (needs to make a selection)
 
         Returns:
             List of tuples (rect, index) for click detection
         """
-        # First, draw the green apple at the top
-        green_card_width = 300
-        green_card_height = 120
-        green_x = (self.ui.width - green_card_width) // 2
-        green_y = 80
+        if not player or not hasattr(player, "get_red_apples"):
+            return []
 
-        self._draw_single_green_card(green_apple, green_x, green_y, green_card_width, green_card_height)
+        # Get player's cards
+        red_apples = player.get_red_apples()
+        if not red_apples:
+            return []
 
-        # Draw instructions
-        instruction_y = green_y + green_card_height + 20
-        self.ui.draw_text(f"Select a red apple to match: {green_apple.get_adjective()}",
-                      self.ui.font_normal, (230, 230, 230),
-                      self.ui.width // 2, instruction_y, center=True)
+        # Get green apple
+        green_apple = self._current_green_apple
+        if not green_apple:
+            return []
 
-        # Red cards dimensions
-        card_width = 160  # Slightly smaller than game cards
-        card_height = 180
-        spacing_x = 20
-        start_y = instruction_y + 40
+        # Use standard card size
+        card_width = 200
+        card_height = 200
 
-        # Calculate layout
-        cards_per_row = min(5, len(red_apples))
+        # Position cards above message log area (which starts at self.ui.height - 170)
+        message_log_top = self.ui.height - 170
+        start_y = message_log_top - card_height - 30  # 30px margin above message log
+
+        # Card spacing
+        spacing_x = 30
+
+        # Calculate layout - limit to 7 cards in a row
+        cards_per_row = min(7, len(red_apples))
+
+        # Calculate total width needed and center
         total_width = cards_per_row * (card_width + spacing_x) - spacing_x
         start_x = (self.ui.width - total_width) // 2
 
-        # Store card rectangles with their indices
+        # Draw player info header
+        self.ui.draw_text(f"{player.get_name()}'s Hand", self.ui.font_normal,
+                    (230, 230, 200) if player.is_human() else (180, 180, 180),
+                    self.ui.width // 2, start_y - 45, center=True)
+
+        if player.is_human():
+            self.ui.draw_text("Click on a card to play it", self.ui.font_small,
+                      (200, 200, 150),
+                      self.ui.width // 2, start_y - 25, center=True)
+
+        # Store card rectangles with their indices for click detection
         card_rects = []
 
-        # Draw red apple cards in the player's hand
-        for i, apple in enumerate(red_apples):
-            row = i // cards_per_row
-            col = i % cards_per_row
-            x = start_x + col * (card_width + spacing_x)
-            y = start_y + row * (card_height + 20)
+        # Draw cards
+        for i, apple in enumerate(red_apples[:cards_per_row]):
+            x = start_x + i * (card_width + spacing_x)
 
-            # Draw the card
-            card_rect = self._draw_single_red_card(
-                apple, player, x, y, card_width, card_height, False, False)
+            # Draw the card using the helper method
+            card_rect = self.__draw_single_red_card(
+                apple, player, x, start_y, card_width, card_height,
+                is_winner=False, show_player=False)
+
+            # For human players, add a selection highlight
+            if player.is_human():
+                # Add a subtle glow effect around the card to indicate it's clickable
+                pygame.draw.rect(self.ui.screen, (150, 100, 100),
+                            card_rect.inflate(6, 6), width=2, border_radius=10)
 
             # Store the rectangle and index for click detection
             card_rects.append((card_rect, i))

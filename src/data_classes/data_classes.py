@@ -130,6 +130,7 @@ class ChosenAppleVectors:
 @dataclass
 class RoundState:
     current_judge: "Agent" = field(init=True) # Required field, needs to be defined prior to the other fields with default values
+    current_players_turn: "Agent" = field(init=True) # Required field, needs to be defined prior to the other fields with default values
     current_round: int = 0 # Initialize to 0, adding first round to GameState will increment to 1
     apples_in_play: ApplesInPlay = field(default_factory=ApplesInPlay)
     chosen_apples: ChosenApples = field(default_factory=ChosenApples)
@@ -142,6 +143,7 @@ class RoundState:
         return f"RoundState("\
                 f"current_round={self.current_round}, "\
                 f"current_judge={self.current_judge.get_name()}, "\
+                f"current_players_turn={self.current_players_turn.get_name()}, "\
                 f"apples_in_play={self.apples_in_play}, "\
                 f"chosen_apples={self.chosen_apples}, "\
                 f"round_winner={self.round_winner.get_name() if self.round_winner is not None else None})"
@@ -150,6 +152,7 @@ class RoundState:
         return {
             "current_round": self.current_round,
             "current_judge": self.current_judge.get_name(),
+            "current_players_turn": self.current_players_turn.get_name(),
             "apples_in_play": self.apples_in_play if self.apples_in_play is not None else None,
             "chosen_apples": self.chosen_apples if self.chosen_apples is not None else None,
             "round_winner": self.round_winner.get_name() if self.round_winner is not None else None
@@ -168,6 +171,9 @@ class RoundState:
 
     def get_current_judge(self) -> "Agent":
         return self.current_judge
+
+    def get_current_players_turn(self) -> "Agent":
+        return self.current_players_turn
 
     def set_green_apple_in_play(self, green_apple_dict: "dict[Agent, GreenApple]") -> None:
         self.apples_in_play.green_apple = green_apple_dict
@@ -528,6 +534,17 @@ class GameLog:
 
     def get_current_judge(self) -> "Agent":
         return self.get_current_game_state().get_current_round_judge()
+
+    def set_current_judge(self, judge: "Agent") -> None:
+        self.get_current_game_state().get_current_round().current_judge = judge
+
+    def get_current_players_turn(self) -> "Agent":
+        """Get the player whose turn it currently is."""
+        return self.get_current_game_state().get_current_round().get_current_players_turn()
+
+    def set_current_players_turn(self, player: "Agent") -> None:
+        """Set the current player's turn."""
+        self.get_current_game_state().get_current_round().current_players_turn = player
 
     def set_green_apple_in_play(self, green_apple_dict: "dict[Agent, GreenApple]") -> None:
         self.get_current_game_state().set_current_round_green_apple_in_play(green_apple_dict)

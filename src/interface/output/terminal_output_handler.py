@@ -33,6 +33,15 @@ class TerminalOutputHandler(OutputHandler):
         # Terminal handler might not need to store this, but must implement the method
         pass
 
+    def set_current_selecting_player(self, player: "Agent") -> None:
+        """Set the current player who is selecting a card."""
+        # Terminal handler might not need to store this, but must implement the method
+        pass
+
+    def clear_current_selecting_player(self) -> None:
+        """Clear the current selecting player."""
+        # Terminal handler might not need to store this, but must implement the method
+        pass
 
     def display_message(self, message: str) -> None:
         """Display a general message via terminal output."""
@@ -133,6 +142,14 @@ class TerminalOutputHandler(OutputHandler):
                 message2 = f"{i + 1}. {red_apple}"
                 print(message2)
                 logging.info(message2)
+
+    def draw_current_players_hand(self, player: "Agent") -> List:
+        """Draw the current player's hand of red apples."""
+        if self.print_in_terminal:
+            print(f"\n{player.get_name()}'s hand:")
+            for i, red_apple in enumerate(player.get_red_apples()):
+                print(f"{i + 1}. {red_apple}")
+        return player.get_red_apples()
 
     def display_red_apple_chosen(self, player: "Agent", red_apple: "RedApple") -> None:
         """Display the red apple chosen by a player via terminal output."""
