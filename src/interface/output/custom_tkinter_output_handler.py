@@ -349,3 +349,21 @@ class CustomTkinterOutputHandler(OutputHandler):
     def log_error(self, message: str) -> None:
         """Log an error message."""
         logging.error(message)
+
+    def clear_current_selecting_player(self):
+        pass # TODO: implement
+
+    def draw_current_players_hand(self, hand):
+        pass
+
+    def draw_game_state(self, state):
+        pass
+
+    def get_submitted_red_card_rects(self):
+        return []
+
+    def set_current_selecting_player(self, player):
+        pass
+
+    def set_state_manager(self, manager):
+        self.manager = manager

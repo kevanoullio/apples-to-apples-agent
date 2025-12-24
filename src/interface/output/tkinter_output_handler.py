@@ -397,3 +397,21 @@ class TkinterOutputHandler(OutputHandler):
     def log_debug(self, message: str) -> None:
         """Log a debug message."""
         logging.debug(message)
+
+    def clear_current_selecting_player(self):
+        pass # TODO: implement
+
+    def draw_current_players_hand(self, hand):
+        pass
+
+    def draw_game_state(self, state):
+        pass
+
+    def get_submitted_red_card_rects(self):
+        return []
+
+    def set_current_selecting_player(self, player):
+        pass
+
+    def set_state_manager(self, manager):
+        self.manager = manager
