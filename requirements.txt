@@ -1,73 +1,50 @@
-absl-py @ file:///croot/absl-py_1714140470852/work
-aiohappyeyeballs @ file:///croot/aiohappyeyeballs_1734469393482/work
-aiohttp @ file:///croot/aiohttp_1734687138658/work
-aiosignal @ file:///tmp/build/80754af9/aiosignal_1637843061372/work
+absl-py==2.3.1
 astunparse==1.6.3
-attrs @ file:///croot/attrs_1734533101012/work
-blinker @ file:///croot/blinker_1696539051175/work
-Brotli @ file:///croot/brotli-split_1714483155106/work
-cachetools @ file:///croot/cachetools_1713977085444/work
-certifi @ file:///croot/certifi_1734473278428/work/certifi
-cffi @ file:///croot/cffi_1726856441404/work
-charset-normalizer @ file:///croot/charset-normalizer_1721748349566/work
-click @ file:///croot/click_1698129812380/work
-contourpy @ file:///croot/contourpy_1732540045555/work
-cryptography @ file:///croot/cryptography_1694444244250/work
-cycler @ file:///tmp/build/80754af9/cycler_1637851556182/work
-flatbuffers @ file:///croot/python-flatbuffers_1722369094438/work
-fonttools @ file:///croot/fonttools_1713551344105/work
-frozenlist @ file:///croot/frozenlist_1730902802621/work
-gast @ file:///Users/ktietz/demo/mc3/conda-bld/gast_1628588903283/work
-gensim @ file:///croot/gensim_1725057941774/work
-google-auth @ file:///croot/google-auth_1715111149956/work
-google-auth-oauthlib @ file:///work/ci_py311_2/google-auth-oauthlib_1679340681059/work
-google-pasta @ file:///Users/ktietz/demo/mc3/conda-bld/google-pasta_1630577991354/work
-grpcio @ file:///croot/grpc-suite_1681912592597/work
-h5py @ file:///croot/h5py_1730215935167/work
-idna @ file:///croot/idna_1714398848350/work
-keras @ file:///home/builder/mesters/opt/envs/tensorflow/conda-bld/keras_1682445665871/work/keras-2.12.0-py2.py3-none-any.whl
-Keras-Preprocessing @ file:///tmp/build/80754af9/keras-preprocessing_1612283640596/work
-kiwisolver @ file:///work/ci_py311/kiwisolver_1676827230232/work
-Markdown @ file:///work/ci_py311/markdown_1676837083112/work
-MarkupSafe @ file:///croot/markupsafe_1704205993651/work
-matplotlib==3.9.2
-multidict @ file:///croot/multidict_1730905498140/work
-numpy @ file:///work/ci_py311/numpy_and_numpy_base_1676823870601/work
-oauthlib @ file:///croot/oauthlib_1679489621486/work
-opt-einsum @ file:///tmp/build/80754af9/opt_einsum_1621500238896/work
-packaging @ file:///croot/packaging_1734472117206/work
-pillow @ file:///croot/pillow_1734430590456/work
-ply==3.11
-propcache @ file:///croot/propcache_1732303986938/work
-protobuf==3.20.3
-pyasn1 @ file:///Users/ktietz/demo/mc3/conda-bld/pyasn1_1629708007385/work
-pyasn1-modules==0.2.8
-pycparser @ file:///tmp/build/80754af9/pycparser_1636541352034/work
-PyJWT @ file:///croot/pyjwt_1730786791730/work
-pyOpenSSL @ file:///croot/pyopenssl_1690223430423/work
-pyparsing @ file:///croot/pyparsing_1731445506121/work
-PyQt5==5.15.10
-PyQt5-sip @ file:///croot/pyqt-split_1698769088074/work/pyqt_sip
-PySocks @ file:///work/ci_py311/pysocks_1676822712504/work
-python-dateutil @ file:///croot/python-dateutil_1716495738603/work
-requests @ file:///croot/requests_1730999120400/work
-requests-oauthlib @ file:///croot/requests-oauthlib_1720615017878/work
-rsa @ file:///tmp/build/80754af9/rsa_1614366226499/work
-scipy @ file:///croot/scipy_1733756309941/work/dist/scipy-1.13.1-cp311-cp311-linux_x86_64.whl#sha256=fc4be95ff7af3ea94e7756042cf24ca2efdd529d8223f3bd293939ac612b0308
-sip @ file:///croot/sip_1698675935381/work
-six @ file:///tmp/build/80754af9/six_1644875935023/work
-smart-open @ file:///work/ci_py311/smart_open_1676842848397/work
-tabulate @ file:///croot/tabulate_1701354810597/work
-tensorboard @ file:///home/builder/mesters/opt/envs/tensorflow/conda-bld/tensorboard_1682445826165/work/tensorboard-2.12.1-py3-none-any.whl
-tensorboard-plugin-wit==1.6.0
-tensorboard_data_server @ file:///croot/tensorboard-data-server_1724172556187/work/tensorboard_data_server-0.7.0-py3-none-manylinux2014_x86_64.whl#sha256=c166a9f297fa12121b89b94be4a4cc150aa7996c9598410ba057ecd592eea8c7
-tensorflow @ file:///home/builder/mesters/opt/envs/tensorflow/conda-bld/tensorflow-base_1682961422577/work/tensorflow_pkg/tensorflow-2.12.0-cp311-cp311-linux_x86_64.whl
-tensorflow-estimator @ file:///home/builder/mesters/opt/envs/tensorflow/conda-bld/tensorflow-estimator_1682445976941/work/tensorflow_estimator-2.12.0-py2.py3-none-any.whl
-termcolor @ file:///work/ci_py311/termcolor_1676838860478/work
-tornado @ file:///croot/tornado_1733960490606/work
-typing_extensions @ file:///croot/typing_extensions_1734714854207/work
-unicodedata2 @ file:///croot/unicodedata2_1713212950228/work
-urllib3 @ file:///croot/urllib3_1727769808118/work
-Werkzeug @ file:///croot/werkzeug_1731005776056/work
-wrapt @ file:///work/ci_py311/wrapt_1676827586170/work
-yarl @ file:///croot/yarl_1732546845924/work
+certifi==2025.11.12
+charset-normalizer==3.4.4
+contourpy==1.3.3
+cycler==0.12.1
+flatbuffers==25.12.19
+fonttools==4.61.1
+gast==0.7.0
+gensim==4.4.0
+google-pasta==0.2.0
+grpcio==1.76.0
+h5py==3.15.1
+idna==3.11
+keras==3.13.0
+kiwisolver==1.4.9
+libclang==18.1.1
+Markdown==3.10
+markdown-it-py==4.0.0
+MarkupSafe==3.0.3
+matplotlib==3.10.8
+mdurl==0.1.2
+ml_dtypes==0.5.4
+namex==0.1.0
+numpy==2.4.0
+opt_einsum==3.4.0
+optree==0.18.0
+packaging==25.0
+pillow==12.0.0
+protobuf==6.33.2
+Pygments==2.19.2
+pyparsing==3.3.1
+python-dateutil==2.9.0.post0
+PyYAML==6.0.3
+requests==2.32.5
+rich==14.2.0
+scipy==1.16.3
+setuptools==80.9.0
+six==1.17.0
+smart_open==7.5.0
+tabulate==0.9.0
+tensorboard==2.20.0
+tensorboard-data-server==0.7.2
+tensorflow==2.20.0
+termcolor==3.2.0
+typing_extensions==4.15.0
+urllib3==2.6.2
+Werkzeug==3.1.4
+wheel==0.45.1
+wrapt==2.0.1

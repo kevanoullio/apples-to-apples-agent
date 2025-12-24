@@ -41,7 +41,7 @@ apples-to-apples-agent/
 ## Cloning Repo and Resource Setup
 1. Clone this repo to your device.
 2. Go to the Google webpage https://code.google.com/archive/p/word2vec/. Download the "GoogleNews-vectors-negative300.bin.gz" word embeddings in the section "Pre-trained word and phrase vectors." Here's is the direct [Google Drive link](https://drive.google.com/file/d/0B7XkCwpI5KDYNlNUTTlSS21pQmM/edit?resourcekey=0-wjGZdNAUop6WykTtMip30g).
-3. Extract the compressed file into the `./apples/` directory. Do not rename the file (it should remain `GoogleNews-vectors-negative300.bin`).
+3. Extract the compressed file into the `./data/embeddings/` directory. Do not rename the file (it should remain `GoogleNews-vectors-negative300.bin`).
 
 ## Environment Setup
 This project was built using Python 3.11.5 and a conda environment. It is recommended to use a virtual environment to manage dependencies.
@@ -59,16 +59,18 @@ Non-Conda users:
 
 ## Running the Program
 1. Navigate to the root directory of the cloned repo.
-2. Run the program using your current version of python `python3 game_driver.py <number players> <number of points> <total games> [green_expansion] [red_expansion] [-A] [-V] [-P] [-T] [-D]`. Example: `game_driver.py 3 5 5 -P` or `game_driver.py 5 5 10 -A -P`.
+2. Run the program using your current version of python `python3 game_driver.py <number players> <number of points> <total games> [green_expansion] [red_expansion] [-A] [-V] [-G] [-P] [-S] [-T] [-D]`. Example: `python3 game_driver.py 3 5 5 -P` or `python3 game_driver.py 5 5 10 green_apples_extension.csv red_apples_extension.csv -A -V -T -D`.
+3. For help: `python3 game_driver.py -h`.
 
 ## How to Play
 1. The program can be run with several option flags:
     - `-A` to use all available base sets and expansion sets
     - `-V` to use the custom vector loader (may not work on all systems)
+    - `-G` to run the game with a graphical user interface
     - `-P` to print all the game info and prompts in the terminal
+    - `-S` to run statistical data analysis after the game
     - `-T` to run in training mode and train the "Comedian" archetype
     - `-D` to enable debug mode for detailed logging
-    - `-G` to run the game with a graphical user interface
 
 2. Initialize the players. Choose between Human, Random, or AI Agent (Literalist, Contrarian, or Comedian). NOTE: The Neural Network version of the AI Agent is not implemented. ALSO NOTE: If you're using the Comedian you need to train it by running the program in training mode using the `-T` option flag. Example: `python3 game_driver.py 3 3 3 -A -P -T`.
 
