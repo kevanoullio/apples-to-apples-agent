@@ -51,8 +51,8 @@ Conda users:
 2. Activate with `conda activate apples`
 
 Non-Conda users:
-1. Create a virtual environment (`python -m venv myenv`)
-2. Activate it (`source myenv/bin/activate`)
+1. Create a virtual environment (`python -m venv venv`)
+2. Activate it (`source venv/bin/activate`)
 3. Install dependencies with `pip install -r requirements.txt`
 
 *NOTE: You can rename the environment to whatever you like. Just make sure to update the environment.yml file with the new name.*
