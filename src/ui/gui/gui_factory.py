@@ -21,12 +21,11 @@ class GUIFactory:
             An instance of GameInterface
         """
         # Get the framework from config
-        framework = config.get("framework", "tkinter")
+        framework = config.get("framework", "pygame")
 
         # Create the GUI based on the framework
         creators = {
             "tkinter": GUIFactory._create_tkinter_gui,
-            "customtkinter": GUIFactory._create_customtkinter_gui,
             "pygame": GUIFactory._create_pygame_gui
         }
 
@@ -46,17 +45,6 @@ class GUIFactory:
         except ImportError as e:
             logging.error(f"Failed to import TkinterUI: {e}")
             raise
-
-    @staticmethod
-    def _create_customtkinter_gui(config: Dict[str, Any]) -> "GameInterface":
-        """Create a CustomTkinter GUI."""
-        try:
-            from src.ui.gui.customtkinter.customtkinter_ui import CustomTkinterUI
-            theme = config.get("theme", "dark-blue")
-            return CustomTkinterUI(theme=theme)
-        except ImportError as e:
-            logging.error(f"Failed to import CustomTkinterUI: {e}. Falling back to tkinter.")
-            return GUIFactory._create_tkinter_gui({})
 
     @staticmethod
     def _create_pygame_gui(config: Dict[str, Any]) -> "GameInterface":

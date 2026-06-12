@@ -31,12 +31,10 @@ interaction:
 
 # --- GUI Settings ---
 gui:
-  framework: "pygame"  # Options: "tkinter", "customtkinter", "pygame"
+  framework: "tkinter"  # Options: "tkinter", "pygame"
   # Framework-specific settings
   tkinter:
     theme: "default"
-  customtkinter:
-    theme: "dark-blue"  # Options: "blue", "dark-blue", "green"
   pygame:
     resolution: [1920, 1080]
     fps: 60
