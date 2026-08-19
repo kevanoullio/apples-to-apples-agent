@@ -1,7 +1,9 @@
 # Apples to Apples - AI Agent
+
 A Python-based implementation of the Apples to Apples, featuring AI agents using various Natural Language Processing (NLP) and Machine Learning (ML) techniques.
 
 ## Project Structure
+
 ```python
 apples-to-apples-agent/
 ├── game_driver.py                # Main entry point
@@ -39,30 +41,36 @@ apples-to-apples-agent/
 ```
 
 ## Cloning Repo and Resource Setup
+
 1. Clone this repo to your device.
-2. Go to the Google webpage https://code.google.com/archive/p/word2vec/. Download the "GoogleNews-vectors-negative300.bin.gz" word embeddings in the section "Pre-trained word and phrase vectors." Here's is the direct [Google Drive link](https://drive.google.com/file/d/0B7XkCwpI5KDYNlNUTTlSS21pQmM/edit?resourcekey=0-wjGZdNAUop6WykTtMip30g).
+2. Go to the Google webpage <https://code.google.com/archive/p/word2vec/>. Download the "GoogleNews-vectors-negative300.bin.gz" word embeddings in the section "Pre-trained word and phrase vectors." Here's is the direct [Google Drive link](https://drive.google.com/file/d/0B7XkCwpI5KDYNlNUTTlSS21pQmM/edit?resourcekey=0-wjGZdNAUop6WykTtMip30g).
 3. Extract the compressed file into the `./data/embeddings/` directory. Do not rename the file (it should remain `GoogleNews-vectors-negative300.bin`).
 
 ## Environment Setup
+
 This project was built using Python 3.11.5 and a conda environment. It is recommended to use a virtual environment to manage dependencies.
 
 Conda users:
+
 1. Run `conda env create -f environment.yml`
 2. Activate with `conda activate apples`
 
 Non-Conda users:
-1. Create a virtual environment (`python -m venv venv`)
-2. Activate it (`source venv/bin/activate`)
+
+1. Create a virtual environment (`python -m venv .venv`)
+2. Activate it (`source .venv/bin/activate`)
 3. Install dependencies with `pip install -r requirements.txt`
 
 *NOTE: You can rename the environment to whatever you like. Just make sure to update the environment.yml file with the new name.*
 
 ## Running the Program
+
 1. Navigate to the root directory of the cloned repo.
 2. Run the program using your current version of python `python3 game_driver.py <number players> <number of points> <total games> [green_expansion] [red_expansion] [-A] [-V] [-G] [-P] [-S] [-T] [-D]`. Example: `python3 game_driver.py 3 5 5 -P` or `python3 game_driver.py 5 5 10 green_apples_extension.csv red_apples_extension.csv -A -V -T -D`.
 3. For help: `python3 game_driver.py -h`.
 
 ## How to Play
+
 1. The program can be run with several option flags:
     - `-A` to use all available base sets and expansion sets
     - `-V` to use the custom vector loader (may not work on all systems)
